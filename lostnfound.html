@@ -209,36 +209,77 @@
     </div>
 
     <script>
-        // Function to handle form submission and display results
-        document.getElementById('lostForm').addEventListener('submit', function(event) {
-            event.preventDefault();  // Prevent form from refreshing the page
-
-            // Capture form data
+        const form = document.getElementById('lostForm');
+        const submittedDataContainer = document.getElementById('submittedData');
+    
+        // Function to load and display lost items
+        function loadLostItems() {
+            const savedItems = JSON.parse(localStorage.getItem('lostItems')) || [];
+    
+            submittedDataContainer.innerHTML = '';
+    
+            savedItems.forEach((item, index) => {
+                const resultHTML = `
+                    <div class="result-item" data-index="${index}">
+                        <p><strong>Name:</strong> ${item.name}</p>
+                        <p><strong>Item Lost:</strong> ${item.itemLost}</p>
+                        <p><strong>Description:</strong> ${item.itemDescriptionLost}</p>
+                        <p><strong>Contact Info:</strong> ${item.contactLostInput}</p>
+                        <button class="delete-btn" data-index="${index}">Delete</button>
+                    </div>
+                `;
+                submittedDataContainer.innerHTML += resultHTML;
+            });
+    
+            // Add delete functionality to each button
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const indexToDelete = parseInt(this.getAttribute('data-index'));
+                    deleteItem(indexToDelete);
+                });
+            });
+        }
+    
+        // Function to delete an item by index
+        function deleteItem(index) {
+            let items = JSON.parse(localStorage.getItem('lostItems')) || [];
+            items.splice(index, 1);  // Remove item at index
+            localStorage.setItem('lostItems', JSON.stringify(items));
+            loadLostItems(); // Refresh the list
+        }
+    
+        // Load items on page load
+        window.addEventListener('load', loadLostItems);
+    
+        // Handle form submission
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+    
             const name = document.getElementById('name').value;
             const itemLost = document.getElementById('itemLost').value;
             const itemDescriptionLost = document.getElementById('itemDescriptionLost').value;
             const lostLocation = document.getElementById('lostLocation').value;
             const contactLost = document.getElementById('contactLost').value;
             const contactLostInput = document.getElementById('contactLostInput').value;
-
-            // Create a new result item for each submission
-            const resultHTML = `
-                <div class="result-item">
-                    <p><strong>Name:</strong> ${name}</p>
-                    <p><strong>Item Lost:</strong> ${itemLost}</p>
-                    <p><strong>Description:</strong> ${itemDescriptionLost}</p>
-                    
-                    <p><strong>Contact Info:</strong> ${contactLostInput}</p>
-                </div>
-            `;
-
-            // Insert the new result into the result container
-            document.getElementById('submittedData').innerHTML += resultHTML;  // Append results
-
-            // Reset the form
-            document.getElementById('lostForm').reset();
+    
+            const newItem = {
+                name,
+                itemLost,
+                itemDescriptionLost,
+                lostLocation,
+                contactLost,
+                contactLostInput
+            };
+    
+            const existingItems = JSON.parse(localStorage.getItem('lostItems')) || [];
+            existingItems.push(newItem);
+            localStorage.setItem('lostItems', JSON.stringify(existingItems));
+    
+            loadLostItems();
+            form.reset();
         });
     </script>
-
+    
+    
 </body>
 </html>
